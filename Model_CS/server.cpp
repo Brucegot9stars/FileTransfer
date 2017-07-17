@@ -5,11 +5,70 @@
 #include <cstring>
 #include <arpa/inet.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #define MAXBUFFERSIZE 1024
 #define MAXFILENAMESIZE 512
 #define DEFAULT_IP "192.168.100.2"
 #define DEFAULT_PORT 6666
+#define CCONFIG_FILE_ENV "OPENVPN_CLIENT_CONFIG_IFLE"
+
+//long long for off_t in 64bit system
+long long gitFileSize(const char* env_var, const char* tar_filename)
+{
+	long long ret = 0;
+	do
+	{
+		const char* env = getenv(env_var);
+		if(NULL == env_var || NULL == env)
+		{
+			
+			std::cout<<"Environment variable does not exist!"<<std::endl;
+			ret =  -1;
+			break;
+		}
+		else if(NULL == tar_filename)
+		{
+			
+			std::cout<<"You did't input a valid file name!"<<std::endl;
+			ret =  -1;
+			break;
+		}
+		
+		//judge the type of the file whether is a regular file
+		string _filepath(env);
+		string _filename=_filepath+'/'+tar_filename;
+	
+		struct stat fileifobuf;
+		memset(&fileifobuf,0,sizeof(fileifobuf));
+
+		int ret = stat(_filename.c_str(), &fileifobuf);
+		if(ret != 0)	
+		{
+			std::cout<<"You failed to get the file's information!"<<std::endl;
+			ret = -1;
+			break;
+		}
+		else if(S_ISREG(fileifobuf.st_mode))
+		{
+			//handle a regular file
+			ret = fileifobuf.st_size;
+			break;
+		}
+		else
+		{
+			std::cout<<"We can not handle this kind of file!"<<std::endl;
+			ret =  -1;
+			break;
+		}
+		
+	}while( 0 );
+		
+	
+	return ret;
+	
+}
 
 int main(int argc, char* argv[])
 {
