@@ -45,7 +45,7 @@ string getfilepath(const char* env_var,const char* filename)
 		string _path(env);
 		string _filepath=_path+'/'+filename;
 		ret = _filepath;
-		std::cout<<"get filepath: "<<ret<<std::endl;
+		//std::cout<<"get filepath: "<<ret<<std::endl;
 		_path.clear();
 		_filepath.clear();		
 		
@@ -86,7 +86,7 @@ long long gitFileSize(const char* env_var, const char* tar_filename)
 		struct stat fileifobuf;
 		memset(&fileifobuf,0,sizeof(fileifobuf));
 
-		int ret = stat(getfilepath(CCONFIG_FILE_ENV,tar_filename).c_str(), &fileifobuf);
+		ret = stat(getfilepath(CCONFIG_FILE_ENV,tar_filename).c_str(), &fileifobuf);
 		if(ret != 0)	
 		{
 			std::cout<<"You failed to get the file's information!"<<std::endl;
@@ -216,7 +216,7 @@ int main(int argc, char* argv[])
 		{	
 			break;
 		}
-		
+		std::cout<<"client request file: "<<buffer<<std::endl;
 		//获取客户端发来的文件名
 		strncpy(filename,buffer,strlen(buffer)>MAXFILENAMESIZE?MAXFILENAMESIZE:strlen(buffer));
 			
@@ -224,7 +224,7 @@ int main(int argc, char* argv[])
 		if(fp == NULL)
 		{
 			std::cout<<"File: "<<filename<<" does not exit!"<<std::endl;
-			std::cout<<getfilepath(CCONFIG_FILE_ENV,filename)<<std::endl;
+			//std::cout<<getfilepath(CCONFIG_FILE_ENV,filename)<<std::endl;
 			//memset(filename,0,MAXFILENAMESIZE+1);
 		}
 		else
@@ -234,6 +234,7 @@ int main(int argc, char* argv[])
 			filesize = gitFileSize(CCONFIG_FILE_ENV, filename);
 			sprintf(buffer,"%lld",filesize);
 			send(conn_socket, buffer, sizeof(buffer),0);
+			std::cout<<"filesize buffer to send: "<<buffer<<" filesize num: "<<filesize<<std::endl;
 		
 			
 			memset(buffer, 0, MAXBUFFERSIZE);

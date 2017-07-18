@@ -141,10 +141,12 @@ int Client::tranferData()
   // 向服务器发送buffer中的数据，此时buffer中存放的是客户端需要接收的文件的名字  
   send(client_socket, buffer, CLIENT_MAX_BUFFER_SIZE, 0);  
   
+  memset(buffer, 0, CLIENT_MAX_BUFFER_SIZE); 
+  
   recv(client_socket, buffer, CLIENT_MAX_BUFFER_SIZE, 0);
   m_filesize = atoll(buffer);
-  
-  
+  //std::cout<<"file's fize buffer: "<<buffer<<std::endl;
+  //std::cout<<"file's fize: "<<m_filesize<<std::endl;
 	FILE *fp = fopen(file_name, "w");  
 	if (fp == NULL)  
 	{  
@@ -165,7 +167,8 @@ int Client::tranferData()
 	      break;  
 	  }  
 	  m_getsize += length;
-	  //progress_rate = (m_getsize* 100)/m_filesize;
+	
+	  progress_rate = (m_getsize*100/m_filesize);
 		printProcess(progress_rate);
 	  write_length = fwrite(buffer, sizeof(char), length, fp);  
 	  if (write_length < length)  
@@ -177,7 +180,7 @@ int Client::tranferData()
 	}  
 	progress_rate = 0;
 	m_getsize = m_filesize = 0;
-	std::cout<<"Recieve Data From Server Finshed!"<<std::endl;
+	std::cout<<"Recieve file: ["<<file_name<<"] From Server Finshed!"<<std::endl;
 	
 	fclose(fp);  
 	
@@ -197,15 +200,17 @@ void Client::printProcess(int rate)
 		//- 左对齐，右边填充空格
 		//%ms，m为指定的输出字段的宽度。如果数据的位数小于m，则左端补以空格，若大于m，则按实际位数输出。
 		//%-100s 表示输出长度为100的字符串，左端对其，不满处用空格填充。
-		printf("[%-100s][%3d%%][%c]\r",str,rate,ptr[rate%4]);
+		printf("\033[?25l" "\033[40;31m" " [%-100s][%3d%%][%c]\r",str,rate,ptr[rate%4]);
 		fflush(stdout);
 		str[rate]='=';
 	}
 	else if(100 == rate)
 	{
-		str[rate] = '=';
-		printf("[%-100s][%3d%%][ok]\n",str,rate);	
+		//str[rate] = '=';
+		memset(str,'=',100);
+		printf("\33[?25h" "\033[40;32m" "[%-100s][%3d%%][ok]\n",str,rate);	
 		memset(str,0,102);
+		printf("\033[40;37m");
 	}
 
 }
@@ -232,7 +237,7 @@ int main(int argc,char* argv[])
 		fileRecvClient.Init();
 		fileRecvClient.tranferData();
 		
-    std::cout<<"Recieving File: "<<fileRecvClient.getFilename() <<" From Server Finished!\n"<<std::endl; 
+    //std::cout<<"Recieving File: "<<fileRecvClient.getFilename() <<" From Server Finished!\n"<<std::endl; 
   
 
 		return 0;
