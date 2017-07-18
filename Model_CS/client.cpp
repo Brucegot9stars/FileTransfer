@@ -1,13 +1,14 @@
 #include <iostream>
-#include <sys/types/h>
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 
 #include <arpa/inet.h>
+#include <unistd.h>
 
-
+using namespace std;
 class Client
 {
 
@@ -17,7 +18,7 @@ public:
 	
 	
 	Client(const char* ip_addr, int port);
-	~Client(){}
+	~Client();
 	
 public:
 	int Init();
@@ -41,6 +42,8 @@ private:
 	char file_name[CLIENT_MAX_FILENAME_SIZE + 1];
 	int client_socket;
 	int progress_rate;
+	long long m_filesize;
+	long long m_getsize;
 	
 };
 
@@ -89,6 +92,7 @@ Client::~Client()
 int Client::Init()
 {
 	int ret = 0;
+	m_filesize = m_getsize =0;
 	memset(&client_addr, 0, sizeof(client_addr));
 	client_addr.sin_family = AF_INET;                // internet协议族  
   client_addr.sin_addr.s_addr = htons(INADDR_ANY); // INADDR_ANY表示自动获取本机地址  
@@ -135,7 +139,10 @@ int Client::tranferData()
 	
 	strncpy(buffer, file_name, strlen(file_name) > CLIENT_MAX_FILENAME_SIZE ? CLIENT_MAX_FILENAME_SIZE : strlen(file_name));  
   // 向服务器发送buffer中的数据，此时buffer中存放的是客户端需要接收的文件的名字  
-  send(client_socket, buffer, CLIENT_MAX_FILENAME_SIZE, 0);  
+  send(client_socket, buffer, CLIENT_MAX_BUFFER_SIZE, 0);  
+  
+  recv(client_socket, buffer, CLIENT_MAX_BUFFER_SIZE, 0);
+  m_filesize = atoll(buffer);
   
   
 	FILE *fp = fopen(file_name, "w");  
@@ -157,7 +164,9 @@ int Client::tranferData()
 	  	  std::cout<<"Recieve Data From Server Failed!"<<std::endl;
 	      break;  
 	  }  
-	
+	  m_getsize += length;
+	  //progress_rate = (m_getsize* 100)/m_filesize;
+		printProcess(progress_rate);
 	  write_length = fwrite(buffer, sizeof(char), length, fp);  
 	  if (write_length < length)  
 	  {  
@@ -166,7 +175,8 @@ int Client::tranferData()
 	  }  
 	  memset(buffer, 0, CLIENT_MAX_BUFFER_SIZE);   
 	}  
-	
+	progress_rate = 0;
+	m_getsize = m_filesize = 0;
 	std::cout<<"Recieve Data From Server Finshed!"<<std::endl;
 	
 	fclose(fp);  
@@ -212,14 +222,14 @@ int main(int argc,char* argv[])
 
 		if (argc != 3 || argv[1] == NULL || argv[2] == NULL)  
 		{  
-				cout<<"Usage: "<<argv[0]<<" ServerIPaddress "<<"ServerPort"<<std::endl;
+				std::cout<<"Usage: "<<argv[0]<<" ServerIPaddress "<<"ServerPort"<<std::endl;
 		    exit(1);  
 		}  
 		int port = atoi(argv[2]);
 		
 		
-		Client fileRecvClient;
-		fileRecvClient.Init(argv[1],port);
+		Client fileRecvClient(argv[1], port);
+		fileRecvClient.Init();
 		fileRecvClient.tranferData();
 		
     std::cout<<"Recieving File: "<<fileRecvClient.getFilename() <<" From Server Finished!\n"<<std::endl; 
