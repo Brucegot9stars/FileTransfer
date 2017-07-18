@@ -97,7 +97,7 @@ long long gitFileSize(const char* env_var, const char* tar_filename)
 		{
 			//handle a regular file
 			ret = fileifobuf.st_size;
-			std::cout<<"filesize: "<<ret<<std::endl;
+			std::cout<<"File:"<<tar_filename<<"'s size: "<<ret<<std::endl;
 			break;
 		}
 		else
@@ -234,7 +234,7 @@ int main(int argc, char* argv[])
 			filesize = gitFileSize(CCONFIG_FILE_ENV, filename);
 			sprintf(buffer,"%lld",filesize);
 			send(conn_socket, buffer, sizeof(buffer),0);
-			std::cout<<"filesize buffer to send: "<<buffer<<" filesize num: "<<filesize<<std::endl;
+			//std::cout<<"filesize buffer to send: "<<buffer<<" filesize num: "<<filesize<<std::endl;
 		
 			
 			memset(buffer, 0, MAXBUFFERSIZE);
@@ -249,7 +249,7 @@ int main(int argc, char* argv[])
 				memset(buffer, 0, MAXBUFFERSIZE);
 			}
 			fclose(fp);
-			std::cout<<"Transfer File completed!"<<std::endl;
+			std::cout<<"Transfer File completed!"<<std::endl<<std::endl;
 	
 		}
 		memset(filename,0,MAXFILENAMESIZE+1);
