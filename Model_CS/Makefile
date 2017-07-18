@@ -14,4 +14,8 @@ $(Obj):$(SubObj)
 
 .PHONY:clean
 clean:
+	rm $(SubObj)
+	
+.PHONY:clean-all
+clean-all:
 	rm $(Obj) $(SubObj)
