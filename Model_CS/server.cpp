@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
 
 	if( argc<=1 )
 	{
-		std::cout<<"server [ip] port"<<std::endl;
+		std::cout<<"Usage: "<<"server ip port"<<std::endl;
 		return -1;
 	}
 	else if(argv[2] != NULL)
