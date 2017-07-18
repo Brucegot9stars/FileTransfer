@@ -107,7 +107,7 @@ int readFile2(const char* env_var,const char* tar_filename)
 int main(int argc,char* argv[])
 {
 
-	int ret = readFile2("tFILEPATH","clientcfgfiles.zip");
+	int ret = readFile2("OPENVPN_CLIENT_CONFIG_IFLE","cfgfiles.7z");
 	return ret;
 
 }
